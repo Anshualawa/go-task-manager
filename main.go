@@ -2,16 +2,23 @@ package main
 
 import (
 	"fmt"
+	"go-task-manager/auth"
 	"go-task-manager/handlers"
 	"go-task-manager/task"
 	"go-task-manager/utils"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // local default
+	}
+
 	// Load existing tasks and setup ID
 	task.Tasks = task.LoadTasksFromFile()
 	task.NextID = utils.GetNextID(task.Tasks)
@@ -25,12 +32,21 @@ func main() {
 	r.Use(middleware.RealIP)    // Logs real IP (useful in prod)
 	r.Use(middleware.Recoverer) // Recovers from panics & logs stack trace
 
-	// Routes
-	r.Get("/tasks", handlers.GetTasksHandler)
-	r.Post("/tasks", handlers.CreateTaskHandler)
-	r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
-	r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
+	r.Post("/signup", auth.SignupHandler)
+	r.Post("/login", auth.LoginHandler)
 
-	fmt.Println(" Server running at http://localhost:8080")
-	http.ListenAndServe(":8080", r)
+	// 🔐 Protect task Routes
+	r.Group(func(r chi.Router) {
+		r.Use(auth.AuthMiddleware) // 🔐 apply to all below
+
+		r.Get("/tasks", handlers.GetTasksHandler)
+		r.Post("/tasks", handlers.CreateTaskHandler)
+		r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
+		r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
+
+	})
+
+	fmt.Println(" Server running at http://localhost:" + port)
+	fmt.Println(" Server running on port " + port)
+	http.ListenAndServe(":"+port, r)
 }

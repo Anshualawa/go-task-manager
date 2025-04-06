@@ -34,19 +34,37 @@ go-task-manager/
 │
 ├── utils/               # Helper functions
 │   └── id.go
+│
+├── auth/               # New! Handles JWT, login/signup
+│   ├── auth.go
+│   └── middleware.go
 
 ```
 ## 📡 API Endpoints (with cURL)
 
+### Authentication
+#### Signup
+```bash
+curl -X POST http://localhost:8080/signup \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alawa", "password": "admin"}'
+```
+#### Login
+```bash
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "alawa", "password": "admin"}'
+```
 ### 🆕 Create Task
 ```bash
 curl -X POST http://localhost:8080/tasks \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <TOKEN>" \
   -d '{"title": "Buy groceries"}'
 ```
 ### 📋  Get All Tasks
 ```bash
-curl http://localhost:8080/tasks
+curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/tasks
 ```
 ### ✅ Mark Task as Complete
 ```bash
