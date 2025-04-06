@@ -1,0 +1,6 @@
+tasks.json
+*.exe
+*.out
+*.test
+.DS_Store
+vendor/
