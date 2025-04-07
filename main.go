@@ -35,14 +35,20 @@ func main() {
 	r.Post("/signup", auth.SignupHandler)
 	r.Post("/login", auth.LoginHandler)
 
+
+	r.Get("/tasks", handlers.GetTasksHandler)
+	r.Post("/tasks", handlers.CreateTaskHandler)
+	r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
+	r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
+
 	// 🔐 Protect task Routes
 	r.Group(func(r chi.Router) {
 		r.Use(auth.AuthMiddleware) // 🔐 apply to all below
 
-		r.Get("/tasks", handlers.GetTasksHandler)
-		r.Post("/tasks", handlers.CreateTaskHandler)
-		r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
-		r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
+		// r.Get("/tasks", handlers.GetTasksHandler)
+		// r.Post("/tasks", handlers.CreateTaskHandler)
+		// r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
+		// r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
 
 	})
 
