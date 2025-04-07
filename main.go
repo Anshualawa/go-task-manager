@@ -11,55 +11,43 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
-	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // local default
+		port = "8080"
 	}
 
-	// Load existing tasks and setup ID
 	task.Tasks = task.LoadTasksFromFile()
 	task.NextID = utils.GetNextID(task.Tasks)
 
-	// Init chi router
 	r := chi.NewRouter()
 
-	// 🔥 Built-in middleware
-	r.Use(middleware.Logger)    // Logs requests
-	r.Use(middleware.RequestID) // Add unique request ID to each req
-	r.Use(middleware.RealIP)    // Logs real IP (useful in prod)
-	r.Use(middleware.Recoverer) // Recovers from panics & logs stack trace
-
-
+	// ✅ Add CORS middleware
 	r.Use(cors.Handler(cors.Options{
-		// AllowedOrigins:   []string{"http://localhost:3000"}, // or "*" for dev
-		AllowedOrigins:   []string{"http://localhost:3000", "https://your-app-url.up.railway.app"},
-		AllowedMethods:   []string{"GET", POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: true
+		AllowCredentials: true,
 	}))
 
+	// 🛡️ Your middlewares
 	r.Use(auth.LoggingMiddleware)
 
+	// 🔐 Auth routes
 	r.Post("/signup", auth.SignupHandler)
 	r.Post("/login", auth.LoginHandler)
 
-
-	// 🔐 Protect task Routes
+	// ✅ Task routes (protected)
 	r.Group(func(r chi.Router) {
-		r.Use(auth.AuthMiddleware) // 🔐 apply to all below
-
+		r.Use(auth.AuthMiddleware)
 		r.Get("/tasks", handlers.GetTasksHandler)
 		r.Post("/tasks", handlers.CreateTaskHandler)
 		r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
 		r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
-
 	})
 
-	fmt.Println(" Server running at http://localhost:" + port)
-	fmt.Println(" Server running on port " + port)
+	fmt.Println("🚀 Server running at http://localhost:" + port)
 	http.ListenAndServe(":"+port, r)
 }
