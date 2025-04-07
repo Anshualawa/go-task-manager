@@ -26,7 +26,7 @@ func main() {
 
 	// ✅ Add CORS middleware
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:*"},
+		AllowedOrigins:   []string{"http://localhost:*","https://reactjs-task-manager-production.up.railway.app"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
