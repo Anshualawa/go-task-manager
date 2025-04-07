@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
@@ -32,23 +33,29 @@ func main() {
 	r.Use(middleware.RealIP)    // Logs real IP (useful in prod)
 	r.Use(middleware.Recoverer) // Recovers from panics & logs stack trace
 
+
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"http://localhost:3000"}, // or "*" for dev
+		AllowedOrigins:   []string{"http://localhost:3000", "https://your-app-url.up.railway.app"},
+		AllowedMethods:   []string{"GET", POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
+
+	r.Use(auth.LoggingMiddleware)
+
 	r.Post("/signup", auth.SignupHandler)
 	r.Post("/login", auth.LoginHandler)
 
-
-	r.Get("/tasks", handlers.GetTasksHandler)
-	r.Post("/tasks", handlers.CreateTaskHandler)
-	r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
-	r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
 
 	// 🔐 Protect task Routes
 	r.Group(func(r chi.Router) {
 		r.Use(auth.AuthMiddleware) // 🔐 apply to all below
 
-		// r.Get("/tasks", handlers.GetTasksHandler)
-		// r.Post("/tasks", handlers.CreateTaskHandler)
-		// r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
-		// r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
+		r.Get("/tasks", handlers.GetTasksHandler)
+		r.Post("/tasks", handlers.CreateTaskHandler)
+		r.Put("/tasks/{id}", handlers.UpdateTaskHandler)
+		r.Delete("/tasks/{id}", handlers.DeleteTaskHandler)
 
 	})
 
