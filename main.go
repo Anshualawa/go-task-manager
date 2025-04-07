@@ -39,7 +39,7 @@ func main() {
 		AllowedOrigins:   []string{"http://localhost:3000", "https://your-app-url.up.railway.app"},
 		AllowedMethods:   []string{"GET", POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: true,
+		AllowCredentials: true
 	}))
 
 	r.Use(auth.LoggingMiddleware)
