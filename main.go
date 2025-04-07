@@ -33,7 +33,7 @@ func main() {
 	}))
 
 	// 🛡️ Your middlewares
-	r.Use(auth.LoggingMiddleware)
+	//r.Use(auth.LoggingMiddleware)
 
 	// 🔐 Auth routes
 	r.Post("/signup", auth.SignupHandler)
